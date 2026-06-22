@@ -1,0 +1,244 @@
+:root {
+  color-scheme: light;
+  --bg: #f4f6f9;
+  --surface: #ffffff;
+  --surface-soft: #eef2f7;
+  --ink: #171a21;
+  --muted: #5f6877;
+  --line: #dbe2ec;
+  --accent: #0f6b63;
+  --accent-dark: #124b47;
+  --shadow: 0 18px 44px rgba(20, 30, 45, 0.09);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background:
+    linear-gradient(180deg, #fbfcfe 0%, var(--bg) 420px),
+    var(--bg);
+  color: var(--ink);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.5;
+}
+
+main {
+  width: min(1320px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 42px 0 72px;
+}
+
+.hero {
+  max-width: 1320px;
+  margin: 0 auto 30px;
+  text-align: center;
+}
+
+.venue {
+  margin: 0 0 10px;
+  color: var(--accent-dark);
+  font-size: 0.92rem;
+  font-weight: 720;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+h1 {
+  max-width: 1320px;
+  margin: 0 auto;
+  font-size: clamp(1.58rem, 2.28vw, 2.18rem);
+  line-height: 1.16;
+  font-weight: 780;
+  letter-spacing: 0;
+}
+
+h1 span {
+  display: block;
+}
+
+.resource-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.resource-link {
+  min-width: 142px;
+  padding: 11px 18px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  text-decoration: none;
+  box-shadow: 0 10px 28px rgba(20, 30, 45, 0.06);
+}
+
+.resource-link span,
+.resource-link small {
+  display: block;
+}
+
+.resource-link span {
+  font-size: 0.98rem;
+  font-weight: 740;
+}
+
+.resource-link small {
+  margin-top: 1px;
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+.resource-link.disabled {
+  cursor: default;
+  opacity: 0.78;
+}
+
+.resource-link.disabled:hover {
+  border-color: #c5d2df;
+}
+
+.experiment-summary {
+  max-width: 1040px;
+  margin: 0 auto 36px;
+  padding: 20px 24px;
+  border-left: 4px solid var(--accent);
+  background: var(--surface);
+  box-shadow: 0 12px 30px rgba(20, 30, 45, 0.06);
+}
+
+.experiment-summary p {
+  margin: 0;
+  color: #313946;
+  font-size: 1.04rem;
+  line-height: 1.72;
+  text-align: left;
+}
+
+.demo-section {
+  margin-top: 38px;
+}
+
+.demo-section h2 {
+  margin: 0 0 16px;
+  color: var(--accent-dark);
+  font-size: 1.28rem;
+  font-weight: 760;
+  letter-spacing: 0;
+}
+
+.video-row {
+  display: grid;
+  gap: 22px;
+  align-items: stretch;
+}
+
+.three-up {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.two-up {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.demo-card {
+  display: flex;
+  min-width: 0;
+  overflow: hidden;
+  flex-direction: column;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.card-copy {
+  min-height: 116px;
+  padding: 16px 17px 14px;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(180deg, var(--surface), #fbfcfe);
+}
+
+.card-copy h3 {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.28;
+  font-weight: 760;
+  letter-spacing: 0;
+}
+
+.card-copy p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.42;
+}
+
+video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #111827;
+  object-fit: contain;
+}
+
+@media (max-width: 980px) {
+  .three-up,
+  .two-up {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  main {
+    width: min(100% - 24px, 1180px);
+    padding: 34px 0 48px;
+  }
+
+  .hero {
+    margin-bottom: 24px;
+    text-align: left;
+  }
+
+  h1 {
+    font-size: clamp(1.55rem, 7.6vw, 2.2rem);
+  }
+
+  h1 span {
+    display: inline;
+  }
+
+  .resource-links {
+    justify-content: flex-start;
+  }
+
+  .resource-link {
+    min-width: 132px;
+    flex: 0 1 148px;
+    text-align: center;
+  }
+
+  .experiment-summary {
+    margin-bottom: 28px;
+    padding: 17px 18px;
+  }
+
+  .experiment-summary p {
+    font-size: 0.97rem;
+    line-height: 1.64;
+  }
+
+  .three-up,
+  .two-up {
+    grid-template-columns: 1fr;
+  }
+
+  .card-copy {
+    min-height: auto;
+  }
+}
