@@ -94,6 +94,11 @@ h1 span {
   font-size: 0.76rem;
 }
 
+.resource-link:hover {
+  border-color: var(--accent);
+  color: var(--accent-dark);
+}
+
 .resource-link.disabled {
   cursor: default;
   opacity: 0.78;
