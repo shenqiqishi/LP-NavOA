@@ -3,107 +3,173 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>LP-NavOA: Integrated Local Navigation and Obstacle Avoidance for Humanoid Robots under Limited Perception</title>
+    <meta name="description" content="LP-NavOA: recurrent local planning for humanoid navigation under limited perception. Method, simulation results, and real-robot demonstrations.">
+    <title data-zh="LP-NavOA：有限感知下人形机器人的局部导航与避障">LP-NavOA: Integrated Local Navigation and Obstacle Avoidance for Humanoid Robots under Limited Perception</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="site.js" defer></script>
   </head>
-  <body>
-    <main>
-      <header class="hero">
-        <p class="venue">Project page for LP-NavOA</p>
-        <h1>
-          <span>LP-NavOA: Integrated Local Navigation and Obstacle Avoidance</span>
-          <span>for Humanoid Robots under Limited Perception</span>
-        </h1>
-        <nav class="resource-links" aria-label="Project resources">
-          <a class="resource-link" href="https://arxiv.org/abs/2606.23249"
-             target="_blank" rel="noopener">
-            <span>Paper</span>
-            <small>arXiv:2606.23249</small>
-          </a>
-          <a class="resource-link" href="https://github.com/shenqiqishi/LP-NavOA-code"
-             target="_blank" rel="noopener">
-            <span>Code</span>
-            <small>GitHub repository</small>
-          </a>
-        </nav>
-      </header>
+  <body><main>
+    <header class="hero">
+      <div class="top-bar">
+<p data-zh="LP-NavOA 项目主页" class="venue">LP-NavOA project page</p>
+<div class="language-switch" role="group" aria-label="Language / 语言" hidden>
+      <button type="button" data-language="en" lang="en" aria-pressed="true">English</button>
+      <button type="button" data-language="zh" lang="zh-CN" aria-pressed="false">中文</button>
+    </div></div><h1>
+<span data-zh="LP-NavOA：有限感知下人形机器人的">LP-NavOA: Integrated Local Navigation and Obstacle Avoidance</span>
 
-      <section class="experiment-summary" aria-label="Experiment protocol">
-        <p>
-          In each trial, the coordinate frame is recalibrated using the robot's initial pose before execution. The target is then specified at a fixed distance directly in front of the robot in this local frame, and the run is terminated once the robot reaches the target x-position rather than requiring convergence to the target y-position. This protocol is intended to evaluate whether the policy can produce timely forward progress while accurately avoiding obstacles and recovering toward the task goal after bypassing. Indoor experiment videos are not uploaded at this stage because laboratory management rules require some internal content to be visually masked, while large-scale masking of the laboratory environment is impractical; the corresponding indoor results are instead fully illustrated by the figures in the paper.
-        </p>
-      </section>
-
+<span data-zh="局部导航与避障一体化">for Humanoid Robots under Limited Perception</span>
+</h1>
+<p data-zh="利用短距离测距、目标方向与时序记忆，学习绕障并在绕过障碍后回归目标。" class="hero-description">Learning to bypass obstacles and recover the goal from short-range sensing, goal direction, and temporal memory.</p>
+<nav class="resource-links" aria-label="Project resources / 项目资源">
+<a class="resource-link" href="https://arxiv.org/abs/2606.23249" target="_blank" rel="noopener"><span data-zh="论文">Paper</span><small>arXiv:2606.23249</small></a>
+<a class="resource-link" href="https://github.com/shenqiqishi/LP-NavOA-code" target="_blank" rel="noopener"><span data-zh="代码">Code</span><small data-zh="GitHub 代码仓库">GitHub repository</small></a></nav>
+<nav class="section-links" aria-label="Page sections / 页面章节">
+<a data-zh="方法架构" href="#architecture">Architecture</a>
+<a data-zh="教师监督" href="#route-shaping">Teacher supervision</a>
+<a data-zh="仿真结果" href="#simulation">Simulation</a>
+<a data-zh="消融对比" href="#ablation">Ablation</a>
+<a data-zh="实机演示" href="#hardware">Real robot</a>
+</nav></header>
+<section class="paper-section" id="architecture" aria-labelledby="architecture-heading">
+<div class="section-heading"><p data-zh="01 / 方法" class="eyebrow">01 / Method</p><h2 data-zh="带记忆的局部规划器，稳定的全身运动控制" id="architecture-heading">A local planner with memory, a stable locomotion backbone</h2><p data-zh="三个 CNN 分别编码前、左、右测距网格，再与朝向、DR / 里程计状态及机体坐标系下的目标融合。GRU 保留短时记忆，仅改写航向指令；冻结的 PPO 骨干通过共享安全滤波器接收指令，生成全身关节目标。部署时不需要全局地图或特权 A* 规划器。">Three CNNs encode the front, left, and right range grids, then fuse them with heading, DR / odometry state, and the body-frame goal. A GRU retains short-horizon memory and overwrites only the heading command. The frozen PPO backbone receives the command through a shared safety filter and generates whole-body joint targets. Deployment requires neither a global map nor the privileged A* planner.</p></div>
+<figure class="paper-figure ">
+      <a class="figure-link" href="media/ScreenShot_2026-10-27_005607_639.png" target="_blank" rel="noopener">
+        <img src="media/ScreenShot_2026-10-27_005607_639.png" width="1992" height="1089" fetchpriority="high" alt="LP-NavOA inference architecture: recurrent local planner, heading injection, safety filter, and frozen PPO locomotion backbone." data-zh-alt="LP-NavOA 推理架构：循环局部规划器、航向注入、安全滤波器和冻结的 PPO 运动骨干。">
+      </a>
+      <figcaption><strong data-zh="图 1 · 推理网络架构。">Fig. 1 · Inference network architecture.</strong> <span data-zh="DR 分支额外预测前向速度，用于航位推算中的目标更新，并不替代给定的速度指令。">The DR variant additionally predicts forward velocity for goal integration in dead reckoning; this does not replace the commanded speed.</span> <span data-zh="点击图片查看原图。" class="image-hint">Select the image to view it at full size.</span></figcaption>
+    </figure>
+</section>
+<section class="paper-section" id="route-shaping" aria-labelledby="route-shaping-heading">
+<div class="section-heading"><p data-zh="02 / 教师监督" class="eyebrow">02 / Teacher supervision</p><h2 data-zh="从绕障引导切换回目标追踪" id="route-shaping-heading">From bypass guidance back to the goal</h2><p data-zh="仅使用特权航路点监督，学生可能记住路线模板；仅朝向关键目标，又可能直接指向被障碍阻挡的空间。动态路线塑形根据测距净空混合两种航向：受阻时 α 接近 0，侧重绕障航路点；净空恢复后 α 接近 1，重新朝向关键目标。航路点与门控值只用于训练，不作为学生部署时的输入。">Waypoint-only supervision can teach the student to replay a route template, while key-goal-only supervision can point directly into an obstacle. Dynamic route shaping blends the two bearings using range clearance: near blockage, α approaches 0 and favors the bypass waypoint; after clearance opens, α approaches 1 and restores goal seeking. Waypoints and the gate are used during training, not supplied to the deployed student.</p></div>
+<figure class="paper-figure ">
+      <a class="figure-link" href="media/ScreenShot_2026-10-27_005630_702.png" target="_blank" rel="noopener">
+        <img src="media/ScreenShot_2026-10-27_005630_702.png" width="2052" height="1308" loading="lazy" decoding="async" alt="Three supervision strategies: waypoint-only route replay, key-goal-only blockage, and obstacle-conditioned dynamic route shaping." data-zh-alt="三种监督方式：仅航路点引发路线复现、仅关键目标导致受阻，以及根据障碍线索切换的动态路线塑形。">
+      </a>
+      <figcaption><strong data-zh="图 2 · 动态路线塑形。">Fig. 2 · Dynamic route shaping.</strong> <span data-zh="将绕障动作与局部障碍线索关联，在避障后恢复稀疏目标追踪。">Supervision ties bypass behavior to local obstacle cues and restores sparse-goal tracking after avoidance.</span> <span data-zh="点击图片查看原图。" class="image-hint">Select the image to view it at full size.</span></figcaption>
+    </figure>
+</section>
+<section class="paper-section" id="simulation" aria-labelledby="simulation-heading">
+<div class="section-heading"><p data-zh="03 / 仿真评估" class="eyebrow">03 / Simulation evaluation</p><h2 data-zh="更及时地到达，减少接触式绕障" id="simulation-heading">More timely arrivals, fewer contact-heavy bypasses</h2><p data-zh="在 MuJoCo 的开放墙体与室内场景中，比较同一冻结骨干上的 R1（仅反应式骨干）、OURS（DR，航位推算）与 OURS（Odom，里程计）。T1 使用特权 A*，仅作为教师参考。下表为论文表 II 的 T-rel. on-time：在教师标定、按路线与速度归一化的时间预算内到达目标的比例，不等同于仅在超时前完成。">MuJoCo open-wall and indoor layouts compare R1 (reactive backbone only), OURS (DR, dead reckoning), and OURS (Odom, odometry) on the same frozen backbone. T1 uses privileged A* and serves as the teacher reference. The table below reports T-rel. on-time from paper Table II: arrival within a teacher-calibrated, route- and speed-normalized time budget, rather than completion before timeout alone.</p></div>
+<figure class="paper-figure ">
+      <a class="figure-link" href="media/ScreenShot_2026-10-27_005649_887.png" target="_blank" rel="noopener">
+        <img src="media/ScreenShot_2026-10-27_005649_887.png" width="2234" height="1254" loading="lazy" decoding="async" alt="Open-wall and indoor trajectories, teacher-relative on-time arrivals, and late arrivals with brush for R1, T1, DR, and Odom." data-zh-alt="R1、T1、DR 与 Odom 在开放墙体和室内场景中的轨迹、相对教师的按时到达率，以及伴随擦碰的延迟到达。">
+      </a>
+      <figcaption><strong data-zh="图 3（节选）· 轨迹与到达时效。">Fig. 3 (excerpt) · Trajectories and arrival timing.</strong> <span data-zh="局部规划器改善绕障后的目标回归；T1 为带特权规划器的参考，R1、DR 和 Odom 均不使用该规划器。">The local planner improves post-obstacle goal recovery. T1 is the privileged reference; R1, DR, and Odom run without that planner.</span> <span data-zh="点击图片查看原图。" class="image-hint">Select the image to view it at full size.</span></figcaption>
+    </figure>
+<div class="results-table-wrap"><table class="results-table">
+<caption data-zh="表 II 节选 · T-rel. on-time（%，三随机种子的均值 ± 标准差）">Table II excerpt · T-rel. on-time (%, mean ± standard deviation over three seeds)</caption>
+<thead><tr><th data-zh="方法" scope="col">Method</th><th data-zh="开放墙体" scope="col">Open wall</th><th data-zh="室内" scope="col">Indoor</th></tr></thead><tbody>
+<tr><th data-zh="R1 · 仅骨干" scope="row">R1 · Backbone only</th><td>38.3 ± 5.2</td><td>40.3 ± 15.3</td></tr>
+<tr><th data-zh="OURS · DR（航位推算）" scope="row">OURS · DR</th><td>85.1 ± 1.3</td><td>88.0 ± 4.3</td></tr>
+<tr><th data-zh="OURS · Odom（里程计）" scope="row">OURS · Odom</th><td>91.9 ± 2.1</td><td>96.6 ± 2.6</td></tr>
+</tbody></table></div>
+<p data-zh="室内场景中，Odom 将接触擦碰率从 R1 的 76.5% 降至 4.9%（表 II）。论文中的 any brush 还包含持续安全制动，不应全部理解为物理碰撞。" class="result-note">In the indoor layout, Odom reduces contact brush from R1’s 76.5% to 4.9% (Table II). The paper’s “any brush” also includes sustained safety braking, so it does not exclusively measure physical contact.</p>
+</section>
+<section class="paper-section" id="ablation" aria-labelledby="ablation-heading">
+<div class="section-heading"><p data-zh="04 / 消融对比" class="eyebrow">04 / Ablation</p><h2 data-zh="训练时的引导，部署时的自主绕障" id="ablation-heading">Guidance during training, learned bypass at deployment</h2><p data-zh="上排展示使用特权 A* 的教师轨迹，下排展示移除该规划器后的学生推理。三列依次为仅航路点、仅关键目标与动态路线目标。动态塑形在绕障与目标回归之间取得平衡；仅关键目标监督难以学会绕行。">The top row shows teacher rollouts with privileged A*; the bottom row shows learned inference after removing that planner. Columns compare waypoint-only, key-goal-only, and dynamic route targets. Dynamic shaping balances bypass and goal recovery, while key-goal-only supervision struggles to learn a bypass.</p></div>
+<figure class="paper-figure ablation-figure">
+      <a class="figure-link" href="media/ScreenShot_2026-10-27_005708_859.png" target="_blank" rel="noopener">
+        <img src="media/ScreenShot_2026-10-27_005708_859.png" width="1272" height="1302" loading="lazy" decoding="async" alt="Six simulation views: teacher supervision in the top row and learned local-planner deployment in the bottom row, for three route-control variants." data-zh-alt="六幅仿真对比：上排为教师监督，下排为学生局部规划器部署，三列对应三种路线控制方式。">
+      </a>
+      <figcaption><strong data-zh="图 4 · 教师与学生的路线控制对比。">Fig. 4 · Teacher and student route-control comparison.</strong> <span data-zh="表 III 中，动态塑形的按时到达率为 DR 85.3%、Odom 92.5%；仅关键目标时分别为 33.9% 和 32.4%。">In Table III, dynamic shaping reaches 85.3% on-time for DR and 92.5% for Odom, versus 33.9% and 32.4% with key-goal-only control.</span> <span data-zh="点击图片查看原图。" class="image-hint">Select the image to view it at full size.</span></figcaption>
+    </figure>
+</section>
+<section class="paper-section" id="hardware" aria-labelledby="hardware-heading">
+<div class="section-heading"><p data-zh="05 / 实机演示" class="eyebrow">05 / Real-robot demonstrations</p><h2 data-zh="Unitree G1 上的有限感知导航" id="hardware-heading">Limited-perception navigation on Unitree G1</h2></div>
+<div class="hardware-overview"><div class="hardware-copy">
+<p data-zh="实机部署使用测距感知骨干与里程计辅助的局部规划器。前、左、右三个 8 × 8 测距网格提供局部障碍信息；论文配置的感知范围为 4 m，更新频率为 12 Hz。">The deployed stack combines the range-conditioned backbone with an odometry-assisted local planner. Three 8 × 8 range grids facing front, left, and right provide local obstacle observations, with a configured range of 4 m and an update rate of 12 Hz.</p>
+<dl class="sensor-specs">
+<div><dt>3 × 8 × 8</dt><dd data-zh="测距网格">Range grids</dd></div>
+<div><dt>4 m</dt><dd data-zh="感知范围">Sensing range</dd></div>
+<div><dt>12 Hz</dt><dd data-zh="测距更新频率">Range update rate</dd></div>
+</dl>
+<p data-zh="论文记录了四类静态障碍布局下的六次成功执行，指令速度为 0.5–0.9 m/s。以下七段视频包含斜置三板同一次执行的两个视角。这些记录展示部署可行性，不构成重复试验的成功率统计。">The paper documents six successful executions across four static obstacle layouts at commanded speeds of 0.5–0.9 m/s. The seven recordings below include two views of the same slanted-panel run. These demonstrate deployment feasibility, not a repeated-trial success rate.</p>
+</div>
+<figure class="paper-figure sensor-figure">
+      <a class="figure-link" href="media/ScreenShot_2026-10-27_005730_186.png" target="_blank" rel="noopener">
+        <img src="media/ScreenShot_2026-10-27_005730_186.png" width="351" height="675" loading="lazy" decoding="async" alt="Unitree G1 humanoid with the range-sensor mounting positions highlighted, from paper Figure 5(c)." data-zh-alt="Unitree G1 人形机器人及标出的测距传感器安装位置，对应论文图 5(c)。">
+      </a>
+      <figcaption><strong data-zh="图 5(c) · 测距传感器配置。">Fig. 5(c) · Range-sensor setup.</strong> <span data-zh="Unitree G1 实机。">Unitree G1 hardware.</span> <span data-zh="点击图片查看原图。" class="image-hint">Select the image to view it at full size.</span></figcaption>
+    </figure>
+</div>
+<aside class="experiment-summary" aria-labelledby="protocol-heading">
+<h3 data-zh="实机实验协议" id="protocol-heading">Real-robot protocol</h3>
+<p data-zh="每次执行前以机器人的初始位姿重新标定局部坐标系，并在正前方指定固定距离的目标。机器人绕过障碍、达到目标的纵向 x 位置后结束，不要求横向 y 精确收敛；启动后无需持续摇杆转向。">Before each run, the local frame is recalibrated from the initial robot pose and a target is placed a fixed distance ahead. The run ends after the robot clears the obstacle and reaches the target’s longitudinal x-position; exact lateral y convergence is not required. No continuous joystick steering is used after the initial command.</p>
+<p data-zh="根据实验室管理要求，室内实验视频涉及的部分内容需要遮挡，暂未公开；相关结果见论文图示。论文中的 3.0 m/s 对应平地骨干速度跟踪实验，以下实机避障视频的指令速度为 0.5–0.9 m/s。" class="protocol-note">Indoor experiment videos are not currently public because laboratory rules require masking internal content; the corresponding results are illustrated in the paper. The paper’s 3.0 m/s result concerns flat-terrain backbone tracking; the hardware avoidance videos below use commands of 0.5–0.9 m/s.</p>
+</aside>
       <section class="demo-section" aria-labelledby="single-obstacle-heading">
-        <h2 id="single-obstacle-heading">Single frontal obstacle</h2>
+        <h3 data-zh="单块正面障碍板" id="single-obstacle-heading">Single frontal obstacle</h3>
         <div class="video-row three-up">
           <article class="demo-card">
             <div class="card-copy">
-              <h3>Single frontal panel at 0.5 m/s</h3>
-              <p>Evaluation of the single-obstacle setting at a commanded speed of 0.5 m/s.</p>
+              <h4 data-zh="单块正面障碍板 · 0.5 m/s">Single frontal panel at 0.5 m/s</h4>
+              <p data-zh="以 0.5 m/s 指令速度评估单障碍绕行。">Evaluation of the single-obstacle setting at a commanded speed of 0.5 m/s.</p>
             </div>
-            <video controls preload="metadata" playsinline src="media/front-blocker-0p5ms.mp4"></video>
+            <video aria-label="Single frontal panel at 0.5 m/s" data-zh="单块正面障碍板 · 0.5 m/s" data-i18n-attribute="aria-label" controls preload="metadata" playsinline src="media/front-blocker-0p5ms.mp4"></video>
           </article>
 
           <article class="demo-card">
             <div class="card-copy">
-              <h3>Single frontal panel at 0.8 m/s</h3>
-              <p>Evaluation of the same single-obstacle setting at a commanded speed of 0.8 m/s.</p>
+              <h4 data-zh="单块正面障碍板 · 0.8 m/s">Single frontal panel at 0.8 m/s</h4>
+              <p data-zh="相同单障碍设置，指令速度提高至 0.8 m/s。">Evaluation of the same single-obstacle setting at a commanded speed of 0.8 m/s.</p>
             </div>
-            <video controls preload="metadata" playsinline src="media/one-board-0p8ms.mp4"></video>
+            <video aria-label="Single frontal panel at 0.8 m/s" data-zh="单块正面障碍板 · 0.8 m/s" data-i18n-attribute="aria-label" controls preload="metadata" playsinline src="media/one-board-0p8ms.mp4"></video>
           </article>
 
           <article class="demo-card">
             <div class="card-copy">
-              <h3>Single frontal panel at 0.9 m/s</h3>
-              <p>Evaluation of the same single-obstacle setting at a commanded speed of 0.9 m/s.</p>
+              <h4 data-zh="单块正面障碍板 · 0.9 m/s">Single frontal panel at 0.9 m/s</h4>
+              <p data-zh="相同单障碍设置，指令速度提高至 0.9 m/s。">Evaluation of the same single-obstacle setting at a commanded speed of 0.9 m/s.</p>
             </div>
-            <video controls preload="metadata" playsinline src="media/one-board-0p9ms.mp4"></video>
+            <video aria-label="Single frontal panel at 0.9 m/s" data-zh="单块正面障碍板 · 0.9 m/s" data-i18n-attribute="aria-label" controls preload="metadata" playsinline src="media/one-board-0p9ms.mp4"></video>
           </article>
         </div>
       </section>
 
       <section class="demo-section" aria-labelledby="multi-obstacle-heading">
-        <h2 id="multi-obstacle-heading">Multi-panel obstacle layouts</h2>
+        <h3 data-zh="多块障碍板布局" id="multi-obstacle-heading">Multi-panel obstacle layouts</h3>
         <div class="video-row two-up">
           <article class="demo-card">
             <div class="card-copy">
-              <h3>Irregular three-panel cluster at 0.5 m/s</h3>
-              <p>Navigation through a non-uniform obstacle arrangement with partial blockage.</p>
+              <h4 data-zh="不规则三板布局 · 0.5 m/s">Irregular three-panel cluster at 0.5 m/s</h4>
+              <p data-zh="在非均匀、部分遮挡的障碍布局中导航。">Navigation through a non-uniform obstacle arrangement with partial blockage.</p>
             </div>
-            <video controls preload="metadata" playsinline src="media/three-irregular-boards-0p5ms.mp4"></video>
+            <video aria-label="Irregular three-panel cluster at 0.5 m/s" data-zh="不规则三板布局 · 0.5 m/s" data-i18n-attribute="aria-label" controls preload="metadata" playsinline src="media/three-irregular-boards-0p5ms.mp4"></video>
           </article>
 
           <article class="demo-card">
             <div class="card-copy">
-              <h3>Two frontal panels at 0.5 m/s</h3>
-              <p>Bypass behavior with two obstacles placed in front of the initial heading.</p>
+              <h4 data-zh="两块正面障碍板 · 0.5 m/s">Two frontal panels at 0.5 m/s</h4>
+              <p data-zh="绕过位于初始朝向前方的两块障碍板。">Bypass behavior with two obstacles placed in front of the initial heading.</p>
             </div>
-            <video controls preload="metadata" playsinline src="media/two-boards-0p5ms.mp4"></video>
+            <video aria-label="Two frontal panels at 0.5 m/s" data-zh="两块正面障碍板 · 0.5 m/s" data-i18n-attribute="aria-label" controls preload="metadata" playsinline src="media/two-boards-0p5ms.mp4"></video>
           </article>
         </div>
       </section>
 
       <section class="demo-section" aria-labelledby="slanted-obstacle-heading">
-        <h2 id="slanted-obstacle-heading">Slanted three-panel obstacle layout</h2>
+        <h3 data-zh="斜置三板障碍布局" id="slanted-obstacle-heading">Slanted three-panel obstacle layout</h3>
         <div class="video-row two-up">
           <article class="demo-card">
             <div class="card-copy">
-              <h3>Slanted three-panel layout, front view</h3>
-              <p>Forward-facing view of the angled obstacle arrangement at 0.5 m/s.</p>
+              <h4 data-zh="斜置三板 · 正面视角">Slanted three-panel layout, front view</h4>
+              <p data-zh="斜置障碍布局的正面记录，指令速度为 0.5 m/s。">Forward-facing view of the angled obstacle arrangement at 0.5 m/s.</p>
             </div>
-            <video controls preload="metadata" playsinline src="media/three-slanted-boards-rear-0p5ms.mp4"></video>
+            <video aria-label="Slanted three-panel layout, front view" data-zh="斜置三板 · 正面视角" data-i18n-attribute="aria-label" controls preload="metadata" playsinline src="media/three-slanted-boards-rear-0p5ms.mp4"></video>
           </article>
 
           <article class="demo-card">
             <div class="card-copy">
-              <h3>Slanted three-panel layout, side view</h3>
-              <p>Side-view recording of the same angled obstacle scenario at 0.5 m/s.</p>
+              <h4 data-zh="斜置三板 · 侧面视角">Slanted three-panel layout, side view</h4>
+              <p data-zh="同一次斜置障碍执行的侧面记录，指令速度为 0.5 m/s。">Side-view recording of the same angled obstacle scenario at 0.5 m/s.</p>
             </div>
-            <video controls preload="metadata" playsinline src="media/three-slanted-boards-side-0p5ms.mp4"></video>
+            <video aria-label="Slanted three-panel layout, side view" data-zh="斜置三板 · 侧面视角" data-i18n-attribute="aria-label" controls preload="metadata" playsinline src="media/three-slanted-boards-side-0p5ms.mp4"></video>
           </article>
         </div>
       </section>
-    </main>
-  </body>
-</html>
+
+</section><footer>
+<p data-zh="图号与说明对应论文原文。图片中的英文标签保留原样；页面说明、图注及视频介绍可切换中英文。">Figure numbers and explanations follow the paper. Labels within the supplied images remain in English; page descriptions, captions, and video introductions are available in both languages.</p>
+<a data-zh="网页源代码" href="https://github.com/shenqiqishi/LP-NavOA" target="_blank" rel="noopener">Project-page source</a>
+</footer></main></body></html>

@@ -3,9 +3,15 @@
 Source of the project page published at
 **<https://shenqiqishi.github.io/LP-NavOA/>**.
 
-It documents the real-robot obstacle-bypass experiments for LP-NavOA: a single
-frontal panel at 0.5 / 0.8 / 0.9 m/s, two-panel and irregular three-panel
-clusters, and a slanted three-panel layout viewed from the front and the side.
+It presents the inference architecture, dynamic route-shaping supervision,
+simulation results, teacher/student ablations, and real-robot obstacle-bypass
+experiments. Five supplied figures follow paper Figs. 1, 2, 3 (excerpt), 4,
+and 5(c). The real-robot section contains seven recordings of six documented
+runs, including two views of the same slanted-panel run.
+
+Use the English / 中文 buttons to switch page text, captions, and image
+descriptions. The choice is remembered locally. Labels embedded in the
+original figures remain in English. Without JavaScript, English remains readable.
 
 | Resource | Link |
 | --- | --- |
@@ -15,9 +21,15 @@ clusters, and a slanted three-panel layout viewed from the front and the side.
 
 ## Contents
 
-- `index.html`, `styles.css` — the page itself. GitHub Pages serves it from
+- `index.html`, `styles.css`, `site.js` — the static page, responsive styles,
+  and language switch. English text and Chinese translations (`data-zh` and
+  `data-zh-alt`) are maintained together in the HTML. GitHub Pages serves it from
   `main` / (root), so pushing a change to `index.html` republishes the site.
-- `media/` — the experiment recordings referenced by the page.
+- `media/` — the paper figures and experiment recordings referenced by the page.
+
+For local preview, serve the repository root using any static HTTP server,
+for example `python -m http.server 8765`, then open <http://localhost:8765/>.
+There are no build steps or external frontend dependencies.
 
 The code, training pipeline and benchmark live in
 [LP-NavOA-code](https://github.com/shenqiqishi/LP-NavOA-code).
